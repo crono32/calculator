@@ -246,12 +246,12 @@ button:active {
 #btn-add,
 #btn-subtract,
 #btn-equals {
-  box-shadow: 0 0 10px 3px black, inset 0 0 3px 3px #a75900;
+  box-shadow: 0 0 6px 2px black, inset 0 0 3px 3px #a75900;
   background-color: #fc8600;
 }
 
 #btn-del,
 #btn-ac {
   background-color: gray;
-  box-shadow: 0 0 10px 3px black, inset 0 0 3px 3px rgb(94, 94, 94);
+  box-shadow: 0 0 6px 2px black, inset 0 0 3px 3px rgb(94, 94, 94);
 }

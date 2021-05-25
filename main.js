@@ -1,3 +1,11 @@
+function createButton(id, gridArea, text) {
+  let btn = document.createElement("button");
+  btn.id = id;
+  btn.style.gridArea = gridArea;
+  btn.textContent = text;
+  return btn;
+}
+
 function add(a, b) {
   return a + b;
 }
@@ -31,14 +39,7 @@ function operate(operator, a, b) {
   }
 }
 
-function createButton(id, gridArea, text) {
-  let btn = document.createElement("button");
-  btn.id = id;
-  btn.style.gridArea = gridArea;
-  btn.textContent = text;
-  return btn;
-}
-
+// Create calculator buttons
 const buttons = document.querySelector("#buttons");
 let nums = [
   "zero",

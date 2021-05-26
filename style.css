@@ -161,23 +161,27 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: flex-end;
   color: white;
-  text-align: right;
-  font-size: 50px;
   background-color: #011e2c;
   box-shadow: inset 0 0 5px 5px black;
   border-radius: 10px;
 }
 
 #screen-text {
-  position: relative;
-  top: 10px;
-  margin: auto 15px;
+  font-size: 50px;
+  margin-right: 10px;
+  margin-top: 30px;
+  box-sizing: border-box;
+  width: 13ch;
+  /* overflow: auto hidden;
+  white-space: nowrap;
+  text-overflow: clip; */
+  text-align: right;
 }
 
 #buttons {
   width: 100%;
-  height: 100px;
   flex-grow: 1;
   display: grid;
   grid-template-columns: repeat(5, 1fr);

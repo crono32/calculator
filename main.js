@@ -26,7 +26,6 @@ const calculator = {
         return;
       }
       this.displayValue = displayValueNumber.toExponential(2);
-      return;
     } else {
       this.displayValue += button.textContent;
     }

@@ -3,7 +3,15 @@ const calculator = {
   displayValue: "0",
   firstOperand: null,
   operator: null,
-  waitingForSecondOperand: true,
+  waitingForSecondOperand: false,
+
+  setDisplayValue: function (value) {
+    if (value.length > 12) {
+      this.displayValue = Number(value).toExponential(2);
+    } else {
+      this.displayValue = value;
+    }
+  },
 
   handleInput: function (button) {
     if (this.firstPress) {
@@ -15,6 +23,41 @@ const calculator = {
       return;
     }
 
+    if (button.classList.contains("number")) {
+      this.handleNumberInput(button);
+    } else if (button.classList.contains("operator")) {
+      this.handleOperatorInput(button);
+    } else {
+      this.handleClearInput(button);
+    }
+  },
+
+  handleFirstInput: function (button) {
+    if (
+      button.textContent === "0" ||
+      button.classList.contains("clear") ||
+      button.textContent === "="
+    ) {
+      return;
+    }
+
+    if (button.textContent === ".") {
+      this.setDisplayValue("0.");
+    } else if (button.classList.contains("operator")) {
+      this.firstOperand = 0;
+      this.waitingForSecondOperand = true;
+      this.operator = button.textContent;
+    } else {
+      this.setDisplayValue(button.textContent);
+    }
+    this.firstPress = false;
+  },
+
+  outputToScreen: function (screen) {
+    screen.textContent = this.displayValue;
+  },
+
+  handleNumberInput: function (button) {
     if (this.displayValue.includes("e")) {
       if (this.displayValue.includes("-")) {
         return;
@@ -22,34 +65,44 @@ const calculator = {
 
       let displayValueNumber = Number(this.displayValue);
       displayValueNumber = displayValueNumber * 10 + Number(button.textContent);
-      if (displayValueNumber == Infinity) {
-        return;
+      if (displayValueNumber != Infinity) {
+        this.setDisplayValue(displayValueNumber.toExponential(2));
       }
-      this.displayValue = displayValueNumber.toExponential(2);
     } else {
-      this.displayValue += button.textContent;
-    }
-
-    if (this.displayValue.length > 13) {
-      this.displayValue = Number(this.displayValue).toExponential(2);
+      this.setDisplayValue(this.displayValue + button.textContent);
     }
   },
 
-  handleFirstInput: function (button) {
-    if (button.textContent === "0" || button.classList.contains("clear")) {
-      return;
-    }
-
-    if (button.textContent === ".") {
-      this.displayValue = "0.";
+  handleOperatorInput: function (button) {
+    if (this.waitingForSecondOperand) {
     } else {
-      this.displayValue = button.textContent;
+      if (button.textContent === "=") {
+      }
     }
-    this.firstPress = false;
   },
 
-  outputToScreen: function (screen) {
-    screen.textContent = this.displayValue;
+  handleClearInput: function (button) {
+    if (button.textContent === "DEL") {
+      if (this.displayValue.length === 1) {
+        this.reset();
+      } else if (this.displayValue.includes("e")) {
+        let number = Number(this.displayValue);
+        number = Math.floor(number / 10);
+        this.setDisplayValue(number.toString());
+      } else {
+        this.setDisplayValue(this.displayValue.slice(0, -1));
+      }
+    } else {
+      this.reset();
+    }
+  },
+
+  reset: function () {
+    this.firstPress = true;
+    this.displayValue = "0";
+    this.firstOperand = null;
+    this.operator = null;
+    this.waitingForSecondOperand = false;
   },
 };
 

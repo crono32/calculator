@@ -1,4 +1,58 @@
-let firstPress = true;
+const calculator = {
+  firstPress: true,
+  displayValue: "0",
+  firstOperand: null,
+  operator: null,
+  waitingForSecondOperand: true,
+
+  handleInput: function (button) {
+    if (this.firstPress) {
+      this.handleFirstInput(button);
+      return;
+    }
+
+    if (button.textContent === "." && this.displayValue.includes(".")) {
+      return;
+    }
+
+    if (this.displayValue.includes("e")) {
+      if (this.displayValue.includes("-")) {
+        return;
+      }
+
+      let displayValueNumber = Number(this.displayValue);
+      displayValueNumber = displayValueNumber * 10 + Number(button.textContent);
+      if (displayValueNumber == Infinity) {
+        return;
+      }
+      this.displayValue = displayValueNumber.toExponential(2);
+      return;
+    } else {
+      this.displayValue += button.textContent;
+    }
+
+    if (this.displayValue.length > 13) {
+      this.displayValue = Number(this.displayValue).toExponential(2);
+    }
+  },
+
+  handleFirstInput: function (button) {
+    if (button.textContent === "0" || button.classList.contains("clear")) {
+      return;
+    }
+
+    if (button.textContent === ".") {
+      this.displayValue = "0.";
+    } else {
+      this.displayValue = button.textContent;
+    }
+    this.firstPress = false;
+  },
+
+  outputToScreen: function (screen) {
+    screen.textContent = this.displayValue;
+  },
+};
 
 const screen = document.querySelector("#screen-text");
 const buttonsContainer = document.querySelector("#buttons");
@@ -42,45 +96,6 @@ function operate(operator, a, b) {
       return multiply(a, b);
     case "/":
       return divide(a, b);
-  }
-}
-
-function processButtonPress(button, screen) {
-  if (firstPress) {
-    if (button.textContent === "0") {
-      return;
-    }
-
-    if (button.textContent === ".") {
-      screen.textContent = "0.";
-    } else {
-      screen.textContent = "";
-      screen.textContent += button.textContent;
-    }
-
-    firstPress = false;
-    return;
-  }
-
-  // Avoid multiple decimals
-  if (button.textContent === "." && screen.textContent.includes(".")) {
-    return;
-  }
-
-  // Check if currently displaying scientific notation
-  if (screen.textContent.includes("e")) {
-    let number = Number(screen.textContent);
-    number = number * 10 + Number(button.textContent);
-    if (number == Infinity) {
-      return;
-    }
-    screen.textContent = number.toExponential(2).toString();
-  } else {
-    screen.textContent += button.textContent;
-  }
-
-  if (screen.textContent.length > 13) {
-    screen.textContent = Number(screen.textContent).toExponential(2);
   }
 }
 
@@ -128,6 +143,7 @@ buttonsContainer.appendChild(
 const buttons = document.querySelectorAll("button");
 buttons.forEach((button) => {
   button.addEventListener("click", () => {
-    processButtonPress(button, screen);
+    calculator.handleInput(button);
+    calculator.outputToScreen(screen);
   });
 });

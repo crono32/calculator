@@ -14,15 +14,6 @@ const calculator = {
   },
 
   handleInput: function (button) {
-    if (this.firstPress) {
-      this.handleFirstInput(button);
-      return;
-    }
-
-    if (button.textContent === "." && this.displayValue.includes(".")) {
-      return;
-    }
-
     if (button.classList.contains("number")) {
       this.handleNumberInput(button);
     } else if (button.classList.contains("operator")) {
@@ -32,36 +23,26 @@ const calculator = {
     }
   },
 
-  handleFirstInput: function (button) {
-    if (
-      button.textContent === "0" ||
-      button.classList.contains("clear") ||
-      button.textContent === "="
-    ) {
-      return;
-    }
-
-    if (button.textContent === ".") {
-      this.setDisplayValue("0.");
-    } else if (button.classList.contains("operator")) {
-      this.firstOperand = 0;
-      this.waitingForSecondOperand = true;
-      this.operator = button.textContent;
-    } else {
-      this.setDisplayValue(button.textContent);
-    }
-    this.firstPress = false;
-  },
-
   outputToScreen: function (screen) {
     screen.textContent = this.displayValue;
   },
 
   handleNumberInput: function (button) {
-    if (this.displayValue.includes("e")) {
-      if (this.displayValue.includes("-")) {
-        return;
+    if (this.firstPress) {
+      if (button.textContent === "0") return;
+      if (button.textContent === ".") {
+        this.setDisplayValue("0.");
+      } else {
+        this.setDisplayValue(button.textContent);
       }
+      this.firstPress = false;
+      return;
+    }
+
+    if (button.textContent === "." && this.displayValue.includes(".")) return;
+
+    if (this.displayValue.includes("e")) {
+      if (this.displayValue.includes("-")) return;
 
       let displayValueNumber = Number(this.displayValue);
       displayValueNumber = displayValueNumber * 10 + Number(button.textContent);
@@ -74,16 +55,31 @@ const calculator = {
   },
 
   handleOperatorInput: function (button) {
+    if (this.firstPress) {
+      if (button.textContent === "=") return;
+      this.firstOperand = 0;
+      this.waitingForSecondOperand = true;
+      this.operator = button.textContent;
+      this.firstPress = false;
+      return;
+    }
+
     if (this.waitingForSecondOperand) {
     } else {
-      if (button.textContent === "=") {
+      if (button.textContent !== "=") {
+        this.firstOperand = Number(this.displayValue);
+        this.operator = button.textContent;
+        this.waitingForSecondOperand = true;
+        this.firstPress = true;
       }
     }
   },
 
   handleClearInput: function (button) {
+    if (this.firstPress) return;
+
     if (button.textContent === "DEL") {
-      if (this.displayValue.length === 1) {
+      if (this.displayValue.length === 1 || this.displayValue.includes("e-")) {
         this.reset();
       } else if (this.displayValue.includes("e")) {
         let number = Number(this.displayValue);

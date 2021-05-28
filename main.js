@@ -54,8 +54,7 @@ const calculator = {
     }
 
     if (this.firstPress) {
-      if (numberStr === this.displayValue && !this.waitingForSecondOperand)
-        return;
+      if (!this.waitingForSecondOperand && numberStr === "0") return;
       if (numberStr === ".") {
         this.setDisplayValue("0.");
       } else {
@@ -83,10 +82,12 @@ const calculator = {
   handleOperatorInput: function (operatorStr) {
     // user changes mind about which operator to use
     if (this.waitingForSecondOperand && this.firstPress) {
-      if (operatorStr !== "=") {
+      if (this.displayValue === "0") {
+        this.firstPress = false;
+      } else if (operatorStr !== "=") {
         this.operator = operatorStr;
+        return;
       }
-      return;
     }
 
     if (!this.waitingForSecondOperand && this.firstPress) {
@@ -112,7 +113,7 @@ const calculator = {
         this.firstPress = true;
         this.firstOperand = Number(this.displayValue);
         this.secondOperand = null;
-        this.operator = operatorStr;
+        this.operator = operatorStr === "=" ? null : operatorStr;
       } else {
         this.reset();
       }
@@ -135,8 +136,8 @@ const calculator = {
     if (this.firstPress) return;
 
     if (this.displayValue.length === 1 || this.displayValue.includes("e-")) {
-      // this.reset();
       this.setDisplayValue("0");
+      this.firstPress = true;
     } else if (this.displayValue.includes("e")) {
       let number = Number(this.displayValue);
       number = Math.floor(number / 10);

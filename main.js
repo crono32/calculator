@@ -2,12 +2,33 @@ const calculator = {
   firstPress: true,
   displayValue: "0",
   firstOperand: null,
+  secondOperand: null,
   operator: null,
   waitingForSecondOperand: false,
+  precision: 5,
+
+  operate: function () {
+    if (this.operator === "/" && this.secondOperand === 0) {
+      alert("You can't divide by zero!");
+      return;
+    }
+
+    switch (this.operator) {
+      case "+":
+        return add(this.firstOperand, this.secondOperand);
+      case "−":
+        return subtract(this.firstOperand, this.secondOperand);
+      case "×":
+        return multiply(this.firstOperand, this.secondOperand);
+      case "÷":
+        return divide(this.firstOperand, this.secondOperand);
+    }
+  },
 
   setDisplayValue: function (value) {
+    // allow a max of 12 characters on display before reformatting
     if (value.length > 12) {
-      this.displayValue = Number(value).toExponential(2);
+      this.displayValue = Number(value).toPrecision(this.precision);
     } else {
       this.displayValue = value;
     }
@@ -15,11 +36,11 @@ const calculator = {
 
   handleInput: function (button) {
     if (button.classList.contains("number")) {
-      this.handleNumberInput(button);
+      this.handleNumberInput(button.textContent);
     } else if (button.classList.contains("operator")) {
-      this.handleOperatorInput(button);
+      this.handleOperatorInput(button.textContent);
     } else {
-      this.handleClearInput(button);
+      this.handleClearInput(button.textContent);
     }
   },
 
@@ -27,69 +48,101 @@ const calculator = {
     screen.textContent = this.displayValue;
   },
 
-  handleNumberInput: function (button) {
+  handleNumberInput: function (numberStr) {
+    if (this.waitingForSecondOperand && !this.operator) {
+      this.reset();
+    }
+
     if (this.firstPress) {
-      if (button.textContent === "0") return;
-      if (button.textContent === ".") {
+      if (numberStr === this.displayValue && !this.waitingForSecondOperand)
+        return;
+      if (numberStr === ".") {
         this.setDisplayValue("0.");
       } else {
-        this.setDisplayValue(button.textContent);
+        this.setDisplayValue(numberStr);
       }
       this.firstPress = false;
       return;
     }
 
-    if (button.textContent === "." && this.displayValue.includes(".")) return;
+    if (numberStr === "." && this.displayValue.includes(".")) return;
 
     if (this.displayValue.includes("e")) {
       if (this.displayValue.includes("-")) return;
 
       let displayValueNumber = Number(this.displayValue);
-      displayValueNumber = displayValueNumber * 10 + Number(button.textContent);
+      displayValueNumber = displayValueNumber * 10 + Number(numberStr);
       if (displayValueNumber != Infinity) {
-        this.setDisplayValue(displayValueNumber.toExponential(2));
+        this.setDisplayValue(displayValueNumber.toString());
       }
     } else {
-      this.setDisplayValue(this.displayValue + button.textContent);
+      this.setDisplayValue(this.displayValue + numberStr);
     }
   },
 
-  handleOperatorInput: function (button) {
-    if (this.firstPress) {
-      if (button.textContent === "=") return;
-      this.firstOperand = 0;
-      this.waitingForSecondOperand = true;
-      this.operator = button.textContent;
-      this.firstPress = false;
+  handleOperatorInput: function (operatorStr) {
+    // user changes mind about which operator to use
+    if (this.waitingForSecondOperand && this.firstPress) {
+      if (operatorStr !== "=") {
+        this.operator = operatorStr;
+      }
       return;
     }
 
-    if (this.waitingForSecondOperand) {
-    } else {
-      if (button.textContent !== "=") {
-        this.firstOperand = Number(this.displayValue);
-        this.operator = button.textContent;
-        this.waitingForSecondOperand = true;
+    if (!this.waitingForSecondOperand && this.firstPress) {
+      if (operatorStr === "=") return;
+      this.firstOperand = 0;
+      this.waitingForSecondOperand = true;
+      this.operator = operatorStr;
+      return;
+    }
+
+    if (this.waitingForSecondOperand && !this.firstPress) {
+      this.secondOperand = Number(this.displayValue);
+      let result = this.operate();
+      console.log(
+        this.firstOperand,
+        this.operator,
+        this.secondOperand,
+        "=",
+        result
+      );
+      if (result) {
+        this.setDisplayValue(result.toString());
         this.firstPress = true;
+        this.firstOperand = Number(this.displayValue);
+        this.secondOperand = null;
+        this.operator = operatorStr;
+      } else {
+        this.reset();
       }
+      return;
+    }
+
+    if (operatorStr !== "=") {
+      this.firstPress = true;
+      this.firstOperand = Number(this.displayValue);
+      this.operator = operatorStr;
+      this.waitingForSecondOperand = true;
     }
   },
 
-  handleClearInput: function (button) {
+  handleClearInput: function (clearStr) {
+    if (clearStr === "AC") {
+      this.reset();
+    }
+
     if (this.firstPress) return;
 
-    if (button.textContent === "DEL") {
-      if (this.displayValue.length === 1 || this.displayValue.includes("e-")) {
-        this.reset();
-      } else if (this.displayValue.includes("e")) {
-        let number = Number(this.displayValue);
-        number = Math.floor(number / 10);
-        this.setDisplayValue(number.toString());
-      } else {
-        this.setDisplayValue(this.displayValue.slice(0, -1));
-      }
+    if (this.displayValue.length === 1 || this.displayValue.includes("e-")) {
+      // this.reset();
+      this.setDisplayValue("0");
+    } else if (this.displayValue.includes("e")) {
+      let number = Number(this.displayValue);
+      number = Math.floor(number / 10);
+      this.setDisplayValue(number.toString());
     } else {
-      this.reset();
+      this.setDisplayValue(this.displayValue.slice(0, -1));
     }
   },
 
@@ -97,6 +150,7 @@ const calculator = {
     this.firstPress = true;
     this.displayValue = "0";
     this.firstOperand = null;
+    this.secondOperand = null;
     this.operator = null;
     this.waitingForSecondOperand = false;
   },

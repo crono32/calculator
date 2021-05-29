@@ -250,3 +250,43 @@ buttons.forEach((button) => {
     calculator.outputToScreen(screen);
   });
 });
+
+window.addEventListener("keydown", (e) => {
+  let key = e.code;
+  let targetButton;
+  let selector;
+
+  switch (true) {
+    case key.includes("Digit"):
+      selector = e.shiftKey ? "#btn-multiply" : `#btn-${key.slice(-1)}`;
+      break;
+    case key === "Period":
+      selector = "#btn-decimalPoint";
+      break;
+    case key === "Backspace":
+      selector = "#btn-del";
+      break;
+    case key === "Space":
+      selector = "#btn-ac";
+      break;
+    case key === "Enter":
+      selector = "#btn-equals";
+      break;
+    case key === "Equal":
+      selector = e.shiftKey ? "#btn-add" : "#btn-equals";
+      break;
+    case key === "Slash":
+      selector = "#btn-divide";
+      break;
+    case key === "Minus":
+      selector = "#btn-subtract";
+      break;
+    case key.includes("Shift"):
+  }
+
+  if (selector) {
+    targetButton = document.querySelector(selector);
+    calculator.handleInput(targetButton);
+    calculator.outputToScreen(screen);
+  }
+});
